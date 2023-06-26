@@ -191,6 +191,7 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="App.config" />
+    <None Include="README.MD" />
     <None Include="Resources\microsip.ini" />
     <None Include="SipPhone_TemporaryKey.pfx" />
   </ItemGroup>
