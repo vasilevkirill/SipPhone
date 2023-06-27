@@ -30,7 +30,7 @@ Public Class Form1
 
     Private Sub RunSipClient()
         Me.Form1_Label1_SetText("Проверяем запущенные процессы")
-        Dim processes As Process() = process.GetProcesses()
+        Dim processes As Process() = Process.GetProcesses()
 
         ' Проход по списку процессов и поиск процесса с именем microsip.exe и путем ProjectAppMicroSipPath
         For Each process As Process In processes
@@ -103,7 +103,8 @@ Public Class Form1
         End Try
 
         Try
-            File.Delete("./microsip/Contacts.xml")
+            Dim flContacts As String = Path.Combine(GlobalConstants.ProjectAppMicroSipPath, "Contacts.xml")
+            File.Delete(flContacts)
         Catch
             ' Игнорирование всех исключений и ошибок
         End Try
@@ -139,6 +140,13 @@ Public Class Form1
     End Sub
 
     Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+        Try
+            Dim flContacts As String = Path.Combine(GlobalConstants.ProjectAppMicroSipPath, "Contacts.xml")
+            File.Delete(flContacts)
+        Catch
+            ' Игнорирование всех исключений и ошибок
+        End Try
+
         Me.Form1_Label1_SetText("Загружаем файлы")
         CreateAppDataFolderAndCopyResources()
         Me.Form1_Label1_SetText("Инициализация")
@@ -335,13 +343,5 @@ Public Class Form1
 
             Next
         End If
-
-
-
-
-        ' Вы можете повторить аналогичные действия для копирования ресурсов из подпапок
-        ' используя рекурсивный обход директорий
-
-        ' Теперь все ресурсы скопированы в папку AppData для вашего приложения
     End Sub
 End Class
