@@ -151,26 +151,20 @@ Public Class Form1
         Knock.Show()
         Knock.Hide()
 
-        If FormSettings.GlobalSettings.Equals(New FormSettings.Settings()) Then
-            FormSettings.ShowDialog()
+        Try
+            FormSettings.GlobalSettings.Validate()
+        Catch ex As Exception
             Me.Form1_Label1_SetText("Загружаем настройки")
-            FormSettings.LoadSettings()
-        End If
-
-        Me.Form1_Label1_SetText("Проверяем настройки")
-        If FormSettings.GlobalSettings.Equals(New FormSettings.Settings()) Then
-            Environment.Exit(-100)
-        End If
+            FormSettings.ShowDialog()
+        End Try
 
         Me.Form1_Label1_SetText("Проверяем настройки")
         Try
             FormSettings.GlobalSettings.Validate()
         Catch ex As Exception
-            MessageBox.Show(ex.Message)
+            Me.Form1_Label1_SetText("Загружаем настройки")
             FormSettings.ShowDialog()
-            FormSettings.LoadSettings()
         End Try
-
 
 
         Me.Form1_Label1_SetText("Кнокаем разок")
@@ -250,8 +244,7 @@ Public Class Form1
         server.Stop()
     End Sub
     Private Function GetUpdatedContactsByte() As Byte()
-        ' Ваш код для обновления значения ContactsByte
-        ' ...
+        UpdateContacts()
         Return ContactsByte
     End Function
 
@@ -266,8 +259,13 @@ Public Class Form1
         timer.Start()
     End Sub
     Private Sub UpdateContacts(Optional sender As Object = Nothing, Optional e As ElapsedEventArgs = Nothing)
-        ContactsByte = New Byte() {}
-        Dim Url As String = String.Format("https://{0}:9443/contacts.xml", FormSettings.GlobalSettings.Server)
+        ContactsByte = GetContactsFromUrl()
+
+    End Sub
+    Private Function GetContactsFromUrl() As Byte()
+        Dim cb = New Byte() {}
+        Dim srv As String = FormSettings.GlobalSettings.Server
+        Dim Url As String = String.Format("https://{0}:9443/contacts.xml", srv)
         Dim handler As New HttpClientHandler()
         Try
             handler.ServerCertificateCustomValidationCallback = AddressOf IgnoreCertificateErrorsCallback
@@ -278,14 +276,13 @@ Public Class Form1
             response.EnsureSuccessStatusCode()
             Dim content As HttpContent = response.Content
             Dim fileContent As Byte() = content.ReadAsByteArrayAsync().GetAwaiter().GetResult()
-            ContactsByte = fileContent
+            cb = fileContent
         Catch ex As Exception
             'MsgBox("Что-то пошло нет так, попробуйте через 5 минут")
 
         End Try
-
-    End Sub
-
+        Return cb
+    End Function
 
     Private Function IgnoreCertificateErrorsCallback(sender As Object, certificate As X509Certificate, chain As X509Chain, sslPolicyErrors As SslPolicyErrors) As Boolean
         ' Всегда возвращаем True для игнорирования ошибок сертификата

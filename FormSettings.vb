@@ -4,6 +4,8 @@ Imports Microsoft.Win32
 
 Public Class FormSettings
 
+    Public Shared GlobalSettings As Settings
+
     Public Structure Settings
         Public Lisense As String
         Public Server As String
@@ -46,7 +48,7 @@ Public Class FormSettings
 
 
     End Structure
-    Public GlobalSettings As Settings
+
     Private Sub Button1_Click_1(sender As Object, e As EventArgs) Handles Button1.Click
         Me.Button1.Text = "Проверка..."
 
@@ -94,7 +96,7 @@ Public Class FormSettings
         End If
 
         Dim KeyOpen As RegistryKey = Registry.CurrentUser.OpenSubKey(GlobalConstants.RegisterKey, False)
-        Dim settings As Settings = New Settings()
+        Dim settings As Settings = New Settings
 
         Dim kLisense As Boolean = KeyOpen.GetValue("Lisense") IsNot Nothing
         If kLisense = True Then
@@ -118,9 +120,13 @@ Public Class FormSettings
             settings.Password = KeyOpen.GetValue("Password").ToString()
         End If
 
-        If Not (settings.Equals(New Settings())) Then
+        Try
+            settings.Validate()
             GlobalSettings = settings
-        End If
+        Catch ex As Exception
+
+        End Try
+
         KeyOpen.Close()
     End Sub
 
